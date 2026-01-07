@@ -21,6 +21,9 @@ export async function POST(request: NextRequest) {
 
         if (!file) return NextResponse.json({ message: 'Image is Required!' }, { status: 400 });
 
+        const tags = JSON.parse(formData.get('tags') as string);
+        const agenda = JSON.parse(formData.get('agenda') as string);
+
         const arrayBuffer = await file.arrayBuffer();
         const buffer = Buffer.from(arrayBuffer);
 
@@ -36,7 +39,11 @@ export async function POST(request: NextRequest) {
 
         event.image = (uploadedResult as { secure_url: string }).secure_url;
 
-        const createdEvent = await Event.create(event);
+        const createdEvent = await Event.create({
+            ...event,
+            tags,
+            agenda
+        });
 
         return NextResponse.json({ message: 'Event Created Successfully!', event: createdEvent }, { status: 201 });
     } catch (error) {
@@ -49,9 +56,9 @@ export async function GET() {
     try {
         await connectDB();
 
-        const events = await Event.find().sort({ createdAt: -1 });
+        const events = await Event.find().sort({ createdAt: -1 }).lean();
 
-        return NextResponse.json({ message: 'Events Fetched Successfully!', events }, { status: 200 });
+        return NextResponse.json({ message: 'Events Fetched Successfully!', events: JSON.parse(JSON.stringify(events)) }, { status: 200 });
     } catch (error) {
         return NextResponse.json({ message: 'Failed to Fetch Events!', error: error instanceof Error ? error.message : 'Unknown Error!' }, { status: 500 });
     }

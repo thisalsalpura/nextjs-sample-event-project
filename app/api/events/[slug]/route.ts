@@ -36,7 +36,7 @@ export async function GET(req: NextRequest, { params }: RouteParams): Promise<Ne
         }
 
         // Return successful response with events data
-        return NextResponse.json({ message: 'Event fetched Successfully!', event }, { status: 200 });
+        return NextResponse.json({ message: 'Event fetched Successfully!', event: JSON.parse(JSON.stringify(event)) }, { status: 200 });
     } catch (error) {
         // Log error for debugging (only in development)
         if (process.env.NODE_ENV === 'development') {
